@@ -1,4 +1,4 @@
-# arabic-font-merge
+# Arabic Font Merge
 
 **[العربية](README.ar.md)** · English
 
