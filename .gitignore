@@ -1,0 +1,25 @@
+# Build output
+build/
+dist/
+*.otc
+*.ttc
+*.woff2
+proof.png
+selftest.html
+
+# Fonts must never be committed — see NOTICE.md
+*.ttf
+*.otf
+!examples/**/*.png
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/

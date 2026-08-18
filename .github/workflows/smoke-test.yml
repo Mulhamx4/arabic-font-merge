@@ -1,0 +1,63 @@
+name: smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate the currency manifest
+        run: python tests/check_manifest.py
+
+      # No font is committed to this repository (see NOTICE.md), and downloading
+      # one would make CI depend on somebody else's uptime, so we generate one.
+      - name: Generate a synthetic test family
+        run: python tests/make_test_font.py tests/fonts
+
+      - name: Survey
+        run: python scripts/inspect_fonts.py tests/fonts
+
+      - name: Build (collection + standalone + symbols + shortcuts)
+        run: python scripts/build_family.py tests/fonts --out build/ --version 1.000
+
+      - name: Verify — exits non-zero on any failure
+        run: python scripts/verify_font.py build/SmokeTest.ttc
+
+      - name: Build again as a Windows .ttc and re-verify
+        run: |
+          python scripts/build_family.py tests/fonts --out build-ttc/ \
+            --version 1.001 --format ttc --woff2
+          python scripts/verify_font.py build-ttc/SmokeTest.ttc
+
+      - name: Proof page (HTML only; no browser in CI)
+        run: python scripts/make_proof.py build/SmokeTest.ttc --out build/ --no-png
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-py${{ matrix.python }}
+          path: |
+            build/
+            build-ttc/
+          retention-days: 7

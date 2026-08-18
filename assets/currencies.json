@@ -1,0 +1,38 @@
+{
+  "_comment": "Official Gulf currency symbols and the sequences that should collapse into them. Arabic shortcuts are written in logical order (the order GSUB sees). Add a new currency by dropping its official SVG in assets/ and appending an entry here -- nothing in the scripts is per-currency.",
+  "currencies": [
+    {
+      "id": "saudi-riyal",
+      "name": "Saudi Riyal",
+      "name_ar": "ريال سعودي",
+      "codepoint": "20C1",
+      "unicode_version": "17.0",
+      "authority": "Saudi Central Bank (SAMA)",
+      "svg": "saudi-riyal.svg",
+      "latin": ["SAR", "sar"],
+      "arabic": ["ر.س.", "ر.س"]
+    },
+    {
+      "id": "uae-dirham",
+      "name": "UAE Dirham",
+      "name_ar": "درهم إماراتي",
+      "codepoint": "20C3",
+      "unicode_version": "18.0",
+      "authority": "Central Bank of the UAE",
+      "svg": "uae-dirham.svg",
+      "latin": ["AED", "aed"],
+      "arabic": ["د.إ.", "د.إ"]
+    },
+    {
+      "id": "omani-rial",
+      "name": "Omani Rial",
+      "name_ar": "ريال عماني",
+      "codepoint": "20C4",
+      "unicode_version": "18.0",
+      "authority": "Central Bank of Oman",
+      "svg": "omani-rial.svg",
+      "latin": ["OMR", "omr"],
+      "arabic": ["ر.ع.", "ر.ع"]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "skill_name": "arabic-font-merge",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "merge-arabic-family-with-symbol",
+      "prompt": "هذي أوزان الخط، ١٦ ملف موجودة في /tmp/eval-inputs/avenir — ابغاك تدمجهم في ملف واحد وتتأكد إن اللغة العربية تشتغل صح في كل الأوزان، وضيف رمز الريال العماني.",
+      "expected_output": "One .otc collection with all 16 faces under a single typographic family, Arabic shaping working in every face (including italics, which lack Arabic in the source), U+20C4 present with working OMR/omr/ر.ع shortcuts that do not fire inside words, CFF and hmtx advances in agreement, plus a proof image and self-test page.",
+      "files": [
+        "/tmp/eval-inputs/avenir"
+      ],
+      "assertions": [
+        "Delivers ONE collection file (.otc/.ttc) containing all 16 faces",
+        "All 16 faces shape Arabic with zero missing glyphs, including the 8 italics that had none in the source",
+        "U+20C4 present in every face and the OMR / omr / ر.ع shortcuts substitute",
+        "Shortcuts do NOT fire inside ordinary words (comrade, COMRADE, OMRAN)",
+        "CFF charstring advance equals hmtx advance for the added glyph (the Adobe dead-space bug)",
+        "All faces report one typographic family with unique PostScript names",
+        "Delivers visual proof and/or a self-contained test page"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "variable-font-request",
+      "prompt": "عندي 16 static weight للخط في /tmp/eval-inputs/avenir — أبغاك تحوّلهم variable font واحد بمحور wght من Light لـ Heavy، وتضيف رمز الريال العماني ⃄. راح أستخدمه في Illustrator.",
+      "expected_output": "Determines that a variable font is not possible from these masters and says so with a measured glyph count rather than a vague claim, then delivers a working collection instead. Should not ship distorted outlines from mechanical weight-matching.",
+      "files": [
+        "/tmp/eval-inputs/avenir"
+      ],
+      "assertions": [
+        "States that a variable font is not possible from these masters and backs it with a measured glyph count",
+        "Does not ship mechanically distorted / interpolation-forced outlines",
+        "Delivers a working single-file collection as the alternative",
+        "U+20C4 present and shortcuts fire in the delivered font",
+        "Mentions the Adobe font-cache or Glyphs-panel caveat, given Illustrator is the stated target"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "latin-truetype-family-figma",
+      "prompt": "merge the Poppins weights in /tmp/eval-inputs/poppins into a single file i can install once, and add the Omani Rial symbol. i need it for a client deck in figma",
+      "expected_output": "A .ttc collection of all 8 TrueType faces under one family with U+20C4 added and OMR/omr shortcuts working. Must NOT claim Arabic works, since Poppins has no Arabic. Given Figma is the target, standalone font files should be offered as a fallback.",
+      "files": [
+        "/tmp/eval-inputs/poppins"
+      ],
+      "assertions": [
+        "Delivers ONE .ttc collection of all 8 TrueType faces",
+        "U+20C4 present in every face with OMR/omr shortcuts firing",
+        "Does NOT claim Arabic works (Poppins has no Arabic at all)",
+        "Offers standalone font files as a Figma fallback",
+        "Guard words remain unbroken"
+      ]
+    }
+  ]
+}

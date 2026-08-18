@@ -1,0 +1,8 @@
+# Core — required by every script
+fonttools>=4.50
+brotli>=1.1          # woff2 compression (fontTools needs it for --woff2 and selftest.html)
+uharfbuzz>=0.39      # real shaping, used by verify_font.py
+
+# Optional — make_proof.py uses it for proof.png and degrades to HTML-only without it
+#   pip install playwright && playwright install chromium
+# playwright>=1.40
