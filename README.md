@@ -2,7 +2,7 @@
 
 **[العربية](README.ar.md)** · English
 
-[![smoke test](https://github.com/<you>/arabic-font-merge/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/<you>/arabic-font-merge/actions/workflows/smoke-test.yml)
+[![smoke test](https://github.com/Mulhamx4/arabic-font-merge/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/Mulhamx4/arabic-font-merge/actions/workflows/smoke-test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A [Claude skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that turns a folder of font weight files into **one installable font file**, checks that Arabic actually works in every weight, and adds the Gulf currency symbols — Saudi Riyal (U+20C1), UAE Dirham (U+20C3) and Omani Rial (U+20C4) — with typed shortcuts like `SAR`, `AED`, `OMR` and `ر.س`, `د.إ`, `ر.ع`.
@@ -40,7 +40,7 @@ It also tells you honestly when a **variable font** is impossible — which, for
 ### As a Claude skill
 
 ```bash
-git clone https://github.com/<you>/arabic-font-merge.git ~/.claude/skills/arabic-font-merge
+git clone https://github.com/Mulhamx4/arabic-font-merge.git ~/.claude/skills/arabic-font-merge
 pip install fonttools brotli uharfbuzz
 ```
 
@@ -55,7 +55,7 @@ cd arabic-font-merge && zip -r ../arabic-font-merge.skill . -x '.git/*' 'example
 ### As a command-line tool
 
 ```bash
-git clone https://github.com/<you>/arabic-font-merge.git
+git clone https://github.com/Mulhamx4/arabic-font-merge.git
 cd arabic-font-merge
 pip install -r requirements.txt
 ```

@@ -2,7 +2,7 @@
 
 **[English](README.md)** · العربية
 
-[![smoke test](https://github.com/<you>/arabic-font-merge/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/<you>/arabic-font-merge/actions/workflows/smoke-test.yml)
+[![smoke test](https://github.com/Mulhamx4/arabic-font-merge/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/Mulhamx4/arabic-font-merge/actions/workflows/smoke-test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 مهارة لـ[كلود](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) تحوّل مجلداً فيه أوزان خط متفرقة إلى **ملف خط واحد قابل للتثبيت**، وتتأكد أن العربية تعمل فعلاً في كل وزن، وتضيف رموز عملات الخليج — الريال السعودي (U+20C1) والدرهم الإماراتي (U+20C3) والريال العماني (U+20C4) — مع اختصارات كتابية مثل `SAR` و`AED` و`OMR` و`ر.س` و`د.إ` و`ر.ع`.
@@ -40,7 +40,7 @@
 ### كمهارة لكلود
 
 ```bash
-git clone https://github.com/<you>/arabic-font-merge.git ~/.claude/skills/arabic-font-merge
+git clone https://github.com/Mulhamx4/arabic-font-merge.git ~/.claude/skills/arabic-font-merge
 pip install fonttools brotli uharfbuzz
 ```
 
@@ -55,7 +55,7 @@ cd arabic-font-merge && zip -r ../arabic-font-merge.skill . -x '.git/*' 'example
 ### كأداة سطر أوامر
 
 ```bash
-git clone https://github.com/<you>/arabic-font-merge.git
+git clone https://github.com/Mulhamx4/arabic-font-merge.git
 cd arabic-font-merge
 pip install -r requirements.txt
 ```
