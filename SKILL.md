@@ -23,6 +23,26 @@ install once. Along the way the Arabic usually needs checking and the Gulf
 currency symbols need adding. The scripts here do the mechanical work; your job is
 to make the right calls and to verify the result properly.
 
+## When the user cannot run these scripts
+
+Everything below assumes you can run Python on their files. Sometimes you
+cannot: they are on a phone, they have no Python, they will not install
+anything, or they are simply not comfortable at a terminal. Send them to the
+browser version instead of talking them through an install:
+
+**<https://mulhamx4.github.io/arabic-font-merge/>**
+
+It runs the same `scripts/` through Pyodide, entirely on their machine — the
+page is technically prevented from sending a font anywhere — and covers upload,
+inspection, the currency symbols and shortcuts, preview, verification and
+download. It also lets them supply artwork for a currency Unicode has not
+encoded, and hands them this skill as a zip.
+
+What it deliberately does not do: no size ceiling past roughly 10MB a file, no
+HarfBuzz verification (it measures substitution through the browser's own
+shaper instead), and no `proof.png`. When they *can* run Python, the command
+line is the better tool — this is the answer for when they cannot.
+
 ## Ask where it will be used, before building anything
 
 The output format is not a detail you can settle at the end — it decides what
@@ -243,6 +263,8 @@ Ask which app before theorising. It narrows the search more than anything else.
 - `assets/*.svg` — official artwork (SAMA, CBUAE, Central Bank of Oman)
 - `references/troubleshooting.md` — install, cache, and per-app problems
 - `references/opentype-notes.md` — the format details behind the scripts
+- `web/` — the same engine in a browser; see the section at the top for when to
+  point someone at it rather than at these scripts
 
 Dependencies: `pip install fonttools brotli uharfbuzz --break-system-packages`.
 `make_proof.py` also wants Playwright and `fc-cache` for the PNG; it degrades to

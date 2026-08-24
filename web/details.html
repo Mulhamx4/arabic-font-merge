@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';">
+<title>كيف تعمل الأداة</title>
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="lx-ar">أداة الخطوط</span><span class="lx-en">Font Tool</span></div>
+    <button class="ghost" id="lang-toggle" type="button">English</button>
+    <button class="ghost" id="theme-toggle" type="button">المظهر</button>
+  </div>
+</header>
+<main class="wrap prose">
+<a class="back" href="index.html"><span class="lx-ar">→ رجوع إلى الأداة</span><span class="lx-en">← Back to the tool</span></a>
+<div class="lx-ar">
+<h1>كيف تعمل الأداة</h1>
+
+<h2 id="privacy">لماذا لا يغادر الخط جهازك</h2>
+<p>هذه ليست سياسة خصوصية بل قيد تقني. الصفحة لا تملك القدرة على إرسال ملفك، وهذا مبني على طبقتين:</p>
+<ol>
+  <li><b>سياسة أمان المحتوى (CSP).</b> الصفحة تعلن <code>connect-src 'self' https://cdn.jsdelivr.net</code> فقط، و<code>form-action 'none'</code>. أي محاولة اتصال بأي عنوان آخر يوقفها المتصفح نفسه، لا كودنا. حتى لو حُقن سكربت خبيث في الصفحة، ليس أمامه جهة يرسل إليها.</li>
+  <li><b>قطع الشبكة داخل محرّك المعالجة.</b> الـ Web Worker الذي يحمل خطك يستبدل <code>fetch</code> و<code>XMLHttpRequest</code> و<code>WebSocket</code> و<code>sendBeacon</code> و<code>importScripts</code> بدوالّ ترمي استثناءً، فور انتهاء تحميل Pyodide وقبل أن يلمس أي ملف لك. ثم يختبر القطع فعليًا ويبلّغ بالنتيجة في سطر الحالة تحت مربع الرفع — إن لم ينجح القطع فستقرأ ذلك، لا العكس.</li>
+</ol>
+<p>ملاحظة صريحة: <code>frame-ancestors</code> لا يعمل عبر وسم <code>meta</code>، فهو يُضبط في ترويسات الخادم. ملف <code>deploy/headers</code> يحتويه.</p>
+
+<h2>ماذا يعمل داخل المتصفح</h2>
+<p>Pyodide يشغّل بايثون مترجَمًا إلى WebAssembly، ومعه مكتبة fontTools نفسها التي تعمل على سطح المكتب. الحزمتان تأتيان من توزيعة Pyodide الرسمية لا من PyPI، فالمصدر واحد ومثبّت الإصدار.</p>
+<table>
+  <tr><th>المكوّن</th><th>الإصدار</th><th>لماذا مثبّت</th></tr>
+  <tr><td>Pyodide</td><td>0.28.3</td><td>حزم Pyodide قد تتخلف عن إصدارات fontTools؛ التحديث التلقائي يعني بناءً مختلفًا دون علمك</td></tr>
+  <tr><td>fontTools</td><td>4.56.0</td><td>يأتي مع التوزيعة أعلاه</td></tr>
+  <tr><td>brotli</td><td>1.1.0</td><td>لازم لإخراج woff2؛ بدونه يختفي خيار الويب بدل أن يفشل البناء</td></tr>
+</table>
+
+<h2>التحقق: لماذا لا نستخدم HarfBuzz</h2>
+<p>مكتبة <code>uharfbuzz</code> غير متوفرة في Pyodide. البديل هنا أقرب إلى الحقيقة لا أبعد عنها: نرسم النص مرّتين، مرة بـ <code>font-feature-settings: "calt" 1</code> ومرة بـ <code>"calt" 0</code>، ونقيس الفرق في العرض. اختلاف العرض يثبت أن الاستبدال وقع فعلًا — <b>في محرّك التنضيد الذي سيستخدمه زائرك</b>، لا في مكتبة منفصلة قد تختلف عنه.</p>
+<p>ويُطبَّق الاختبار على الطرفين: قائمة إيجابية يجب أن يتغيّر عرضها (<code>SAR</code>، <code>ر.س</code> …) وقائمة سلبية يجب ألا يتغيّر (<code>COMRADE</code>، <code>SARAH</code>، <code>sarcasm</code> …). القائمة السلبية لا تقلّ أهمية عن الإيجابية.</p>
+
+<h2>التحقق التفاضلي</h2>
+<p>التقرير يقارن الناتج بملفك الأصلي، لا بمعيار مطلق. لو كان خطك ينقصه حروف أردية قبل أن نلمسه، فسيظل ينقصها بعد البناء — وهذا ليس كسرًا أحدثناه. الأحمر محجوز للفرق: نقطة ترميز كانت موجودة واختفت، رمز طُلب ولم يصل، تعارض جديد بين <code>hmtx</code> والـ charstring.</p>
+
+<h2>الخط المتغيّر: لماذا الدمج غير متاح</h2>
+<p>إضافة محرف إلى خط متغيّر تفسد عروض المحارف بصمت. جدول <code>HVAR</code> يربط كل محرف بمجموعة فروق (deltas)، وحين تكون خريطة الربط أقصر من عدد المحارف تُملأ بتكرار آخر مدخل — فيرث المحرف الجديد فروق جاره. النتيجة رمز يتغيّر عرضه عبر محاور التصميم بمقدار وحدة أو وحدتين، ولا تراه أدوات fontTools لأنها تعيد حساب العروض من نقاط <code>gvar</code>، بينما محرّكات التنضيد الحقيقية تقرأ <code>HVAR</code> وتراه.</p>
+<p>لذلك يُقرأ جدول الربط قبل إضافة أي محرف، ثم يُثبَّت المحرف الجديد على مجموعة فروق أصفار في كل المحاور. ومسار الدمج نفسه يُخفى للخط المتغيّر لأن دمج المحاور مسألة أخرى تمامًا.</p>
+
+
+<h2 id="rename">إعادة التسمية: ما تشترطه الرخصة فعلًا</h2>
+<p>البند الثالث من رخصة SIL Open Font License يقول إن النسخة المعدَّلة لا يجوز أن تستعمل الاسم المحجوز «إلا بإذن خطي صريح من صاحب الحقوق»، ثم يضيف جملة كثيرًا ما تُغفَل: <b>«هذا القيد ينطبق على الاسم الأساسي كما يُعرض للمستخدمين فقط».</b></p>
+<p>فالإلزام يتطلب شرطين معًا لا واحدًا: أن يعلن الملف اسمًا محجوزًا في سجل حقوق النشر، <em>وأن</em> يكون اسم العائلة نفسه يستعمل ذلك الاسم. والأداة تفحص الشرطين معًا.</p>
+<table>
+  <tr><th>الحالة</th><th>مثال</th><th>إعادة التسمية</th></tr>
+  <tr><td>OFL بلا اسم محجوز</td><td>IBM Plex Sans Arabic</td><td>اختيارية</td></tr>
+  <tr><td>OFL يحجز اسمًا لا يحمله</td><td>Readex Pro يحجز <code>RevReading Lexend</code></td><td>اختيارية</td></tr>
+  <tr><td>OFL يحجز الاسم الذي يحمله</td><td>—</td><td>مطلوبة</td></tr>
+</table>
+<p>وحتى في الحالة الثالثة يبقى التجاوز متاحًا، لأن البند نفسه يستثني حالة الإذن الخطي — وأيضًا لأن كشف الاسم المحجوز يقرأ نصًا بشريًا وقد يخطئ. الخانة تظهر عندئذٍ وتشرح، والمسؤولية على من يعلّمها.</p>
+<p>وأيًا كان قرارك، اسم PostScript يبقى ASCII دائمًا: المواصفة تشترط ذلك، ولاحقة عربية خالصة لا تصل إليه فيبقى الاسم المحجوز في الملف — ولهذا تُطلَب لاحقة فيها حرف أو رقم لاتيني واحد على الأقل.</p>
+
+<h2 id="local">الأدوات المحلية</h2>
+<p>حين تتجاوز ملفاتك حدود المتصفح، أو تريد بناءً آليًا ضمن سكربت، فالسكربتات نفسها تعمل على جهازك بلا سقف حجم:</p>
+<pre><code>pip install fonttools brotli uharfbuzz
+python3 build_family.py &lt;مجلد-الخطوط&gt; --out build/ --version 2.100
+python3 verify_font.py "build/&lt;العائلة&gt;.otc"</code></pre>
+<p>النسخة المحلية تستخدم HarfBuzz للتحقق، فتقريرها أشمل من تقرير الصفحة.</p>
+</div>
+
+<div class="lx-en">
+<h1>How it works</h1>
+
+<h2>Why your font never leaves your machine</h2>
+<p>This is a technical constraint rather than a privacy policy. The page has no ability to send your file, in two layers:</p>
+<ol>
+  <li><b>Content Security Policy.</b> The page declares only <code>connect-src 'self' https://cdn.jsdelivr.net</code>, plus <code>form-action 'none'</code>. Any attempt to reach another address is stopped by the browser itself, not by our code. Even injected script has nowhere to send anything.</li>
+  <li><b>The engine revokes its own network access.</b> The Web Worker holding your font replaces <code>fetch</code>, <code>XMLHttpRequest</code>, <code>WebSocket</code>, <code>sendBeacon</code> and <code>importScripts</code> with throwing stubs, as soon as Pyodide finishes loading and before it touches any file of yours. It then tests that the revocation actually bites and reports the result in the status line under the drop box — if it failed, you will read that, not the opposite.</li>
+</ol>
+<p>Stated plainly: <code>frame-ancestors</code> does not work from a <code>meta</code> tag, so it belongs in the server's response headers. <code>deploy/headers</code> carries it.</p>
+
+<h2>What runs in the browser</h2>
+<p>Pyodide runs CPython compiled to WebAssembly, with the same fontTools library that runs on the desktop. Both packages come from the official Pyodide distribution rather than PyPI, so there is one origin and a pinned version.</p>
+<table>
+  <tr><th>Component</th><th>Version</th><th>Why pinned</th></tr>
+  <tr><td>Pyodide</td><td>0.28.3</td><td>Pyodide packages lag fontTools releases; auto-updating would mean a different build without you knowing</td></tr>
+  <tr><td>fontTools</td><td>4.56.0</td><td>ships with the above</td></tr>
+  <tr><td>brotli</td><td>1.1.0</td><td>needed for woff2; without it the web option disappears rather than the build failing</td></tr>
+</table>
+
+<h2>Verification: why not HarfBuzz</h2>
+<p><code>uharfbuzz</code> is not available in Pyodide. The substitute here is closer to the truth, not further from it: the text is laid out twice, once with <code>font-feature-settings: "calt" 1</code> and once with <code>"calt" 0</code>, and the widths compared. A width difference proves the substitution happened — <b>in the shaping engine your visitor will actually use</b>, rather than in a separate library that may disagree with it.</p>
+<p>The test runs both ways: a positive list whose width must change (<code>SAR</code>, <code>ر.س</code> …) and a negative list whose width must not (<code>COMRADE</code>, <code>SARAH</code>, <code>sarcasm</code> …). The negative list matters as much as the positive one.</p>
+
+<h2>Differential verification</h2>
+<p>The report compares the result against your original file, not against an absolute standard. If your font was missing Urdu letters before we touched it, it still is afterwards — and that is not breakage we caused. Red is reserved for the difference: a codepoint that was there and is gone, a symbol requested and not delivered, a new disagreement between <code>hmtx</code> and the charstring.</p>
+
+<h2>Variable fonts: why merging is not offered</h2>
+<p>Appending a glyph to a variable font corrupts advance widths silently. The <code>HVAR</code> table maps each glyph to a delta set, and when that map is shorter than the glyph count it is padded by repeating its last entry — so the new glyph inherits its neighbour's deltas. The result is a symbol whose width drifts by a unit or two across the design space, invisible to fontTools' own instancer because that rebuilds widths from <code>gvar</code> phantom points, and plainly visible to every real shaper because those prefer <code>HVAR</code>.</p>
+<p>So the map is read before any glyph is added, and the new glyph is then pinned to an all-zero delta set on every axis. The merge route itself is hidden for variable input, because merging design axes is an entirely different problem.</p>
+
+
+<h2>Renaming: what the licence actually requires</h2>
+<p>Clause 3 of the SIL Open Font License says a modified version may not use the Reserved Font Name "unless explicit written permission is granted by the corresponding Copyright Holder", and then adds a sentence that is often skipped: <b>"This restriction only applies to the primary font name as presented to the users."</b></p>
+<p>So the obligation needs two conditions, not one: the file must declare a reserved name in its copyright record, <em>and</em> its own family name must use it. The tool checks both.</p>
+<table>
+  <tr><th>Case</th><th>Example</th><th>Renaming</th></tr>
+  <tr><td>OFL, no reserved name</td><td>IBM Plex Sans Arabic</td><td>optional</td></tr>
+  <tr><td>OFL reserving a name it does not carry</td><td>Readex Pro reserves <code>RevReading Lexend</code></td><td>optional</td></tr>
+  <tr><td>OFL reserving the name it carries</td><td>—</td><td>required</td></tr>
+</table>
+<p>Even in the third case the override stays available, because the clause carves out written permission itself — and because reserved-name detection reads human prose and can be wrong. The checkbox appears then and explains itself; whoever ticks it owns the decision.</p>
+<p>Either way the PostScript name stays ASCII: the spec requires it, and a purely Arabic suffix cannot reach it, which would leave the reserved name sitting in the file. That is why at least one Latin letter or digit is required in the suffix.</p>
+
+<h2>The local tools</h2>
+<p>When your files exceed what a browser can do, or you want the build inside a script, the same scripts run on your machine with no size ceiling:</p>
+<pre><code>pip install fonttools brotli uharfbuzz
+python3 build_family.py &lt;font-dir&gt; --out build/ --version 2.100
+python3 verify_font.py "build/&lt;Family&gt;.otc"</code></pre>
+<p>The local version verifies through HarfBuzz, so its report is broader than the page's.</p>
+</div>
+
+<div class="about" id="about">
+  <h2><span class="lx-ar">عن المشروع</span><span class="lx-en">About</span></h2>
+  <p class="lx-ar">طوّرها <b class="author-name"></b> — مفتوحة المصدر برخصة MIT. المراجعة والاقتراحات والتحسينات مرحّب بها على GitHub.</p>
+  <p class="lx-en">Built by <b class="author-name"></b> — open source under the MIT licence. Review, suggestions and improvements are welcome on GitHub.</p>
+  <p class="project-links" id="project-links"></p>
+</div>
+</main>
+<script type="module" src="pages.js"></script>
+</body>
+</html>

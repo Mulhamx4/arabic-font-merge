@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';">
+<title>الخط لا يظهر؟</title>
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="lx-ar">أداة الخطوط</span><span class="lx-en">Font Tool</span></div>
+    <button class="ghost" id="lang-toggle" type="button">English</button>
+    <button class="ghost" id="theme-toggle" type="button">المظهر</button>
+  </div>
+</header>
+<main class="wrap prose">
+<a class="back" href="index.html"><span class="lx-ar">→ رجوع إلى الأداة</span><span class="lx-en">← Back to the tool</span></a>
+<div class="lx-ar">
+<h1>الخط لا يظهر؟</h1>
+<p>الأعراض التي يبلّغ عنها الناس نادرًا ما تكون السبب الحقيقي. اتبع الترتيب: الخطوات الأولى رخيصة وتلتقط أغلب الحالات.</p>
+
+<h2>٠ — هل المشكلة في الملف أصلًا؟</h2>
+<p>افتح <b>صفحة الاختبار الذاتي</b> التي نزّلتها من الخطوة الخامسة، في أي متصفح. الخط مضمَّن داخل الصفحة، فالتثبيت لا دخل له.</p>
+<ul>
+  <li><b>الرموز تظهر</b> ← الملف سليم. كل ما تبقى مشكلة تثبيت أو كاش أو تطبيق. توقّف عن فحص الخط.</li>
+  <li><b>الرموز لا تظهر</b> ← المشكلة في الملف نفسه. ارجع وأعد البناء، وراجع تقرير التحقق.</li>
+</ul>
+<p>هذه الخطوة وحدها توفّر جولة تخمين كاملة، ولهذا صفحة الاختبار متاحة من اليوم الأول.</p>
+
+<h2>الرمز غير موجود في «خريطة المحارف»</h2>
+<p>متوقَّع، وليس عطلًا. رموز العملات الثلاثة حديثة في يونيكود، و«عارض المحارف» في ماك و«Character Map» في ويندوز يقرآن <b>قاعدة بيانات يونيكود في نظام التشغيل</b> لا الخط. فما لا يعرفه النظام لن يُدرج ولو كان داخل الخط.</p>
+<ul>
+  <li><b>أدوبي:</b> <code>Type ▸ Glyphs</code> مع <code>Show: Entire Font</code>، ثم انزل لآخر القائمة. المحارف المضافة حديثًا تأتي في النهاية. هذه اللوحة تقرأ الخط مباشرة.</li>
+  <li><b>أي مكان آخر:</b> الصق الحرف، أو اكتب الاختصار (<code>SAR</code> أو <code>ر.س</code>…).</li>
+</ul>
+
+<h2>ثبّتُّ الخط ولم يتغيّر شيء</h2>
+<p>هذا كاش في الغالب الأعم. الترتيب من الأنجع إلى الأقل:</p>
+<ol>
+  <li><b>ارفع رقم الإصدار وأعد البناء.</b> الكاش مفهرس باسم PostScript، فرفع الإصدار يجعله يرى خطًا مختلفًا. هذا هو الحل الذي يعمل فعلًا؛ ما بعده نظافة.</li>
+  <li><b>احذف النسخة القديمة أولًا.</b> نفس الأسماء الداخلية تعني أن النظام قد يعود إلى الملفات الأصلية. في ماك: «كتاب الخطوط» ← اختر العائلة ← إزالة. أو أعد البناء مع لاحقة اسم جديدة، فينتفي التعارض من أصله.</li>
+  <li><b>كاش أدوبي:</b> أغلق كل تطبيقات أدوبي، ابحث عن <code>AdobeFnt*.lst</code> واحذفها (مواضعها متعددة)، ثم أعد التشغيل.</li>
+  <li><b>أعد تشغيل التطبيق.</b> التطبيقات تُعدّد الخطوط عند فتحها. هذه وحدها تحل نسبة مفاجئة من البلاغات.</li>
+  <li>كاش ماك كحل أخير: <code>sudo atsutil databases -remove</code> ثم سجّل خروجًا ودخولًا.</li>
+</ol>
+
+<h2>ملف otc لا يُثبَّت على ويندوز</h2>
+<p>ليس عطلًا في الملف. مستكشف ويندوز لم يسجّل امتداد <code>.otc</code> كنوع خط إطلاقًا، فلا يعرض خيار «تثبيت» له. الحل هو صيغة <code>ttc</code> من قائمة صيغة الإخراج — تحوّل المسارات من CFF إلى TrueType، وويندوز يدعم <code>ttc</code> منذ عقود (خطوط النظام نفسها كذلك).</p>
+
+<h2>فراغ زائد حول الرمز</h2>
+<p>افحص العرض المُشفَّر قبل أن تلمس الهوامش. محرف CFF يخزّن عرضه مرتين: في <code>hmtx</code>، وداخل الـ charstring كإزاحة عن <code>nominalWidthX</code>. لو كُتب العرض المطلق في الثاني اكتسب المحرف فراغًا ميتًا — تراه تطبيقات أدوبي ولا تراه المتصفحات، لأنها تقرأ <code>hmtx</code>. تقرير التحقق يقارن الاثنين لكل محرف؛ لو ظهر «تعارض عرض» فهذا هو.</p>
+
+<h2>الاختصار لا يتحوّل</h2>
+<ol>
+  <li>الاختصارات مبنية على خاصية <code>calt</code>، وهي قابلة للإطفاء في Illustrator وInDesign (<code>Contextual Alternates</code> في لوحة المحارف). تأكد أنها مفعّلة.</li>
+  <li>القواعد <b>محمية عمدًا</b>: الاختصار لا يعمل إذا جاوره حرف. <code>SAR 10</code> تعمل، و<code>SARAH</code> لا تعمل — وهذا مقصود، وإلا لأصبحت كل كلمة فيها <code>SAR</code> مكسورة.</li>
+  <li><code>AED500</code> بلا مسافة <b>ستعمل</b>، لأن الرقم ليس حرفًا. سلوك مقصود.</li>
+</ol>
+
+<h2>العائلة متناثرة في قائمة الخطوط</h2>
+<p>خطأ شائع في الخطوط المنشورة: سجل nameID 2 في منصة ويندوز يقول <code>Regular</code> لكل الأوجه بما فيها Bold Italic. البناء يصلح هذا بإعادة كتابة السجلات 1/2/16/17 من مصدر واحد. لو بقيت متناثرة بعد البناء، فالتطبيق يقرأ من كاش قديم — راجع القسم أعلاه.</p>
+
+<h2>العربي يظهر بخط مختلف داخل المائل</h2>
+<p>عائلات كثيرة تشحن العربي في المستقيم فقط، فيسقط العربي في المائل إلى خط النظام. فعّل «نقل العربي إلى المائل» في خيارات التعديل. العربي يبقى مستقيمًا داخل اللاتيني المائل، وهذا هو المتعارف عليه لا تنازل.</p>
+
+<h2>شكل الرمز يبدو غريبًا في خطي</h2>
+<p>الرسم الرسمي للرموز هندسي. في خط نسخي أو شديد التزيين سيبدو دخيلًا بعض الشيء، ولا حل تقنيًا لذلك: الرمز علامة رسمية لها رسم واحد معتمد، ورسم نسخة «متناسقة» منه عمل مصمّم حروف لا سكربت.</p>
+</div>
+
+<div class="lx-en">
+<h1>Font not showing up?</h1>
+<p>Reported symptoms are rarely the actual cause. Work the list in order — the early steps are cheap and catch most cases.</p>
+
+<h2>0 — Is it the file at all?</h2>
+<p>Open the <b>self-test page</b> you downloaded in step five, in any browser. The font is embedded in the page, so installation is irrelevant.</p>
+<ul>
+  <li><b>Symbols show</b> → the file is fine. Everything else is installation, cache, or the application. Stop inspecting the font.</li>
+  <li><b>Symbols missing</b> → the file itself is wrong. Rebuild and read the verification report.</li>
+</ul>
+<p>This step alone saves an entire round of guessing, which is why the self-test exists from day one.</p>
+
+<h2>The symbol is not in the character map</h2>
+<p>Expected, not a bug. These three codepoints are new in Unicode, and macOS Character Viewer and Windows Character Map read <b>the operating system's Unicode database</b>, not the font. What the OS does not know about will not be listed, even when the font contains the glyph.</p>
+<ul>
+  <li><b>Adobe:</b> <code>Type ▸ Glyphs</code> with <code>Show: Entire Font</code>, scroll to the end. Newly added glyphs land last. That panel reads the font directly.</li>
+  <li><b>Anywhere else:</b> paste the character, or type the shortcut (<code>SAR</code>, <code>ر.س</code>…).</li>
+</ul>
+
+<h2>I installed it and nothing changed</h2>
+<p>Almost always caching. Most effective first:</p>
+<ol>
+  <li><b>Raise the version number and rebuild.</b> Caches are keyed by PostScript name, so a version bump makes them see a different font. This is the fix that actually works; the rest is hygiene.</li>
+  <li><b>Remove the old copy first.</b> Same internal names means the system may resolve to the originals. macOS: Font Book → select the family → Remove. Or rebuild with a name suffix, which removes the clash entirely.</li>
+  <li><b>Adobe cache:</b> quit every Adobe app, find and delete <code>AdobeFnt*.lst</code> (several locations), relaunch.</li>
+  <li><b>Restart the application.</b> Apps enumerate fonts at launch. This alone fixes a surprising share of reports.</li>
+  <li>macOS font cache as a last resort: <code>sudo atsutil databases -remove</code>, then log out and back in.</li>
+</ol>
+
+<h2>An otc file will not install on Windows</h2>
+<p>Not a fault in the file. Windows Explorer never registered the <code>.otc</code> extension as a font type, so it offers no Install action at all. The fix is the <code>ttc</code> output format — it converts CFF outlines to TrueType, and Windows has supported <code>ttc</code> for decades (its own system fonts ship that way).</p>
+
+<h2>Extra space around the symbol</h2>
+<p>Check the encoded advance before touching side bearings. A CFF glyph stores its width twice: in <code>hmtx</code>, and inside the charstring as an offset from <code>nominalWidthX</code>. Write an absolute value into the second and the glyph gains dead space — visible in Adobe apps and invisible in browsers, which read <code>hmtx</code>. The verification report compares the two for every glyph; an "advance mismatch" finding is exactly this.</p>
+
+<h2>The shortcut does not substitute</h2>
+<ol>
+  <li>Shortcuts ride on the <code>calt</code> feature, which can be switched off in Illustrator and InDesign (<code>Contextual Alternates</code> in the character panel). Check it is on.</li>
+  <li>The rules are <b>guarded deliberately</b>: the shortcut will not fire next to a letter. <code>SAR 10</code> fires, <code>SARAH</code> does not — by design, or every word containing <code>SAR</code> would break.</li>
+  <li><code>AED500</code> with no space <b>will</b> fire, because a digit is not a letter. Intended behaviour.</li>
+</ol>
+
+<h2>The family is scattered across the font menu</h2>
+<p>A common bug in shipped fonts: the Windows nameID 2 record says <code>Regular</code> for every face, Bold Italic included. The build fixes it by rewriting records 1/2/16/17 from one source. If it is still scattered afterwards, the app is reading a stale cache — see above.</p>
+
+<h2>Arabic renders in a different font inside italics</h2>
+<p>Many families ship Arabic in the uprights only, so Arabic in an italic run falls back to a system font. Turn on "copy Arabic into the italics" in the options. The Arabic stays upright inside slanted Latin, which is the accepted convention rather than a compromise.</p>
+
+<h2>The symbol looks out of place in my font</h2>
+<p>The official artwork is geometric. In a naskh or heavily styled face it will look somewhat foreign, and there is no technical fix: the symbol is a state mark with one approved shape, and drawing a matching variant is a type designer's job, not a script's.</p>
+</div>
+
+<div class="about" id="about">
+  <h2><span class="lx-ar">عن المشروع</span><span class="lx-en">About</span></h2>
+  <p class="lx-ar">طوّرها <b class="author-name"></b> — مفتوحة المصدر برخصة MIT. المراجعة والاقتراحات والتحسينات مرحّب بها على GitHub.</p>
+  <p class="lx-en">Built by <b class="author-name"></b> — open source under the MIT licence. Review, suggestions and improvements are welcome on GitHub.</p>
+  <p class="project-links" id="project-links"></p>
+</div>
+</main>
+<script type="module" src="pages.js"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+/* Colour lives here and nowhere else. Two palettes, no intermediate shades --
+   plan section 5. Every value is a custom property so a third palette would be
+   an addition rather than a rewrite.
+
+   Contrast is enforced, not asserted: tests/test_contrast.js parses this file
+   and fails the build if any pair the UI uses drops below WCAG AA (4.5:1 for
+   text, 3:1 for control borders and focus) in either palette. Change a value
+   here and run it. */
+
+:root {
+  color-scheme: light;
+
+  --bg:            #ffffff;
+  --bg-sunken:     #f5f6f7;
+  --bg-raised:     #ffffff;
+  --bg-inset:      #eceef0;
+
+  --ink:           #14181c;
+  --ink-muted:     #545c64;
+  --ink-faint:     #6d757d;   /* the tightest pair; see the checker */
+
+  --line:          #d7dbdf;
+  --line-strong:   #8b939b;
+
+  --accent:        #0f5c8c;
+  --accent-ink:    #ffffff;
+  --accent-soft:   #e7f0f6;
+
+  --ok:            #1a6b34;
+  --ok-soft:       #e6f2ea;
+  --warn:          #7a5200;
+  --warn-soft:     #fdf2dc;
+  --bad:           #9b1c14;
+  --bad-soft:      #fbeae8;
+
+  --focus:         #0f5c8c;
+
+  --radius:        8px;
+  --radius-lg:     14px;
+  --gap:           1rem;
+  --measure:       74ch;
+
+  --shadow:        0 1px 2px rgba(20, 24, 28, .06),
+                   0 6px 20px rgba(20, 24, 28, .06);
+}
+
+/* The default follows the system; the toggle overrides it in both directions,
+   so every token is redefined under an explicit [data-theme] too. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg:          #101418;
+    --bg-sunken:   #0b0e11;
+    --bg-raised:   #171c21;
+    --bg-inset:    #1e242a;
+
+    --ink:         #eef1f4;
+    --ink-muted:   #b3bcc4;
+    --ink-faint:   #8d979f;
+
+    --line:        #2b3238;
+    --line-strong: #5a6570;
+
+    --accent:      #6fb6e4;
+    --accent-ink:  #06121b;
+    --accent-soft: #16242e;
+
+    --ok:          #63c98a;
+    --ok-soft:     #12241a;
+    --warn:        #e0b25c;
+    --warn-soft:   #241d0f;
+    --bad:         #f08a80;
+    --bad-soft:    #2a1512;
+
+    --focus:       #6fb6e4;
+
+    --shadow:      0 1px 2px rgba(0, 0, 0, .4),
+                   0 6px 20px rgba(0, 0, 0, .35);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg:          #101418;
+  --bg-sunken:   #0b0e11;
+  --bg-raised:   #171c21;
+  --bg-inset:    #1e242a;
+
+  --ink:         #eef1f4;
+  --ink-muted:   #b3bcc4;
+  --ink-faint:   #8d979f;
+
+  --line:        #2b3238;
+  --line-strong: #5a6570;
+
+  --accent:      #6fb6e4;
+  --accent-ink:  #06121b;
+  --accent-soft: #16242e;
+
+  --ok:          #63c98a;
+  --ok-soft:     #12241a;
+  --warn:        #e0b25c;
+  --warn-soft:   #241d0f;
+  --bad:         #f08a80;
+  --bad-soft:    #2a1512;
+
+  --focus:       #6fb6e4;
+
+  --shadow:      0 1px 2px rgba(0, 0, 0, .4),
+                 0 6px 20px rgba(0, 0, 0, .35);
+}

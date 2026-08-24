@@ -16,6 +16,44 @@ shaping, symbol placement, or naming, also run the four-step workflow on a real
 family you are licensed to modify, and **look at `proof.png`**. A numeric pass
 does not prove the spacing looks right.
 
+## Changing the web tool
+
+`web/` runs the same `scripts/` in a browser through Pyodide, so a change to
+`fontkit.py` reaches both. Its own checks run headless and download nothing:
+
+```bash
+tests/run_all.sh                                   # everything
+PY=./.venv-pyodide-parity/bin/python tests/run_all.sh   # against the fontTools Pyodide ships
+```
+
+They cover theme contrast in both palettes, i18n key hygiene, JavaScript syntax,
+the variable-font advance regression, the engine on four corpora, byte-parity
+with the command-line build, the licence rules, Arabic family names, custom
+currency artwork, and `fsType` blocking.
+
+Without `tests/fetch_fonts.sh` the fixtures fall back to synthetic fonts —
+`make_test_font.py` for the static family and `make_variable_test_font.py` for a
+variable one — so every check still runs. What skips is the richer *corpora*,
+and those tests name what they skipped rather than pretending to have run. That
+is what CI does.
+
+Run `tests/fetch_fonts.sh` locally before submitting anything that touches
+shaping or naming: the real corpora exercise Arabic coverage, CFF outlines and
+an italic without Arabic, and the synthetic fonts exercise none of those.
+
+Two web-specific invariants, both with a test behind them:
+
+1. **Never append a glyph to a variable font without neutralising `HVAR`.**
+   `VarIdxMap.postRead` pads a short map by repeating its last entry, so the new
+   glyph inherits its neighbour's width deltas. fontTools' own instancer cannot
+   see the damage — it rebuilds widths from `gvar` — but every real shaper can.
+   `tests/test_variable_advance.py` measures it through HarfBuzz, and fails if
+   the *unfixed* path stops drifting: a fixture that no longer reproduces the
+   bug would otherwise turn the test green for the wrong reason.
+2. **A user-supplied codepoint must never land on an existing glyph.**
+   `add_symbol_glyph` writes straight into the cmap; U+0041 would turn every
+   capital A into a currency symbol. `tests/test_custom_currency.py` guards it.
+
 ## Adding a currency
 
 The scripts contain nothing per-currency. Add the entry to

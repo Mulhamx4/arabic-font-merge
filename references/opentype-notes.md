@@ -12,6 +12,7 @@ cover. Each section explains why the code is shaped the way it is.
 - [Arabic and GSUB ordering](#arabic-and-gsub-ordering)
 - [Collections](#collections)
 - [Variable font feasibility](#variable-font-feasibility)
+- [Adding a glyph to a variable font](#adding-a-glyph-to-a-variable-font)
 - [Grafting glyphs between fonts](#grafting-glyphs-between-fonts)
 
 ## Advance widths are stored twice
@@ -156,6 +157,51 @@ Retail static families fail heavily — typically 20–25% of glyphs. Mechanical
 outline offsetting (dilate/erode via a polygon clipper) is not a fix: eroding
 detaches thin joins, dilating closes counters. Report the count and recommend a
 collection.
+
+## Adding a glyph to a variable font
+
+Appending a glyph to a variable font corrupts its advance widths, in one of two
+ways depending on when fontTools happens to decompile `HVAR`.
+
+`HVAR` maps each glyph to a row of advance-width deltas through an
+`AdvWidthMap`, which is a `DeltaSetIndexMap`. Two lines in
+`otTables.VarIdxMap` do the damage:
+
+```python
+# preWrite: trailing duplicates are dropped, so the map reaches disk short
+while len(mapping) > 1 and mapping[-2] == mapping[-1]:
+    del mapping[-1]
+
+# postRead: a short map is padded by REPEATING ITS LAST ENTRY
+mapList.extend([mapList[-1]] * (len(glyphOrder) - len(mapList)))
+```
+
+A glyph appended after that map was written therefore inherits whatever delta
+row the previous final glyph carried. If the map is decompiled *before* the
+glyph is added, `preWrite` instead raises `KeyError` on the new name. Neither
+outcome is what anyone wants, and only one of them is loud:
+
+| when `HVAR` is first decompiled | what happens |
+| --- | --- |
+| before the glyph is added | `KeyError` at save |
+| lazily, at save time | saves cleanly, and the advance silently varies |
+
+**fontTools' own tooling cannot see the silent case.**
+`instantiateVariableFont` rebuilds `hmtx` from `gvar` phantom points, so an
+instance measures correct while the shipped variable font is wrong. Every real
+shaper prefers `HVAR` and sees the drift. Measure with HarfBuzz, not with an
+instance.
+
+The fix has to happen in a fixed order: read the index maps *while the glyph
+order is still original*, then point the new glyph at a delta row that is zero
+across every region. Prefer an all-zero row that already exists; otherwise
+append an `ItemVariationData` with no regions, whose delta is zero by
+construction. `LsbMap`, `RsbMap` and the `VVAR` equivalents need the same
+treatment when present.
+
+An absent `AdvWidthMap` is a third trap: the mapping is then implicit, glyph ID
+*is* the delta-set index, and a glyph appended at index N picks up row N of
+somebody else's data. Materialise an explicit map rather than leaving it.
 
 ## Grafting glyphs between fonts
 

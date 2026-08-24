@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';">
+<title>شروط الاستخدام</title>
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="lx-ar">أداة الخطوط</span><span class="lx-en">Font Tool</span></div>
+    <button class="ghost" id="lang-toggle" type="button">English</button>
+    <button class="ghost" id="theme-toggle" type="button">المظهر</button>
+  </div>
+</header>
+<main class="wrap prose">
+<a class="back" href="index.html"><span class="lx-ar">→ رجوع إلى الأداة</span><span class="lx-en">← Back to the tool</span></a>
+<div class="lx-ar">
+<h1>شروط الاستخدام</h1>
+<p style="color:var(--warn)"><b>ملاحظة:</b> هذا النص صياغة عملية تلخّص الالتزامات الفعلية للأداة، وليس نصًا مراجَعًا قانونيًا. راجعه مع مختص قبل الإطلاق العام.</p>
+
+<h2>١ — حقك في تعديل الخط</h2>
+<p>أنت تقرّ بأنك تملك حق تعديل كل ملف ترفعه، بموجب الرخصة التي حصلت عليها معه. الأداة تقرأ ما وضعه المسبك داخل الملف وتتصرف بناءً عليه: إذا كان بت <code>Restricted License Embedding</code> مضبوطًا في <code>OS/2.fsType</code> تتوقف الرحلة، وإذا كانت الرخصة SIL Open Font License تُفرض إعادة التسمية. لكن هذه إشارات آلية لا تُغني عن مسؤوليتك: غياب الإشارة ليس إذنًا.</p>
+
+<h2>٢ — المعالجة المحلية</h2>
+<p>كل المعالجة تجري داخل متصفحك. الأداة لا تستقبل ملفاتك ولا تخزّنها ولا ترسلها إلى أي خادم، ولا يوجد خادم يستقبلها أصلًا. القيود التقنية التي تجعل ذلك ممكنًا موصوفة في <a href="details.html#privacy">كيف تعمل الأداة</a>.</p>
+
+<h2>٣ — رسوم العملات</h2>
+<p>رسوم رمز الريال السعودي والدرهم الإماراتي والريال العماني مأخوذة من الجهات الرسمية المصدِرة (البنك المركزي السعودي، مصرف الإمارات المركزي، البنك المركزي العماني) وتُضاف كما هي دون إعادة رسم. استخدامك لها يخضع لما تحدده تلك الجهات، لا لهذه الأداة.</p>
+
+<h2>٤ — لا ضمان</h2>
+<p>الأداة تُقدَّم كما هي، بلا ضمان من أي نوع. الملف الناتج مسؤوليتك أنت: مسؤوليتك أن تختبره قبل الاعتماد عليه، وأن تتأكد من صلاحيته لأي استخدام تجاري تنويه. تقرير التحقق داخل الصفحة أداة مساعدة لا شهادة صلاحية.</p>
+
+<h2>٥ — الختم داخل الملف</h2>
+<p>يُضاف إلى سجل الإصدار داخل الملف (nameID 5) نص يفيد بأن الملف عُدِّل بهذه الأداة. الغرض شفافية لأي فاحص لاحق: من يفتح الملف يعرف أنه ليس كما شحنه المسبك.</p>
+
+<h2>٦ — لا تتبّع</h2>
+<p>لا تُجمع أي بيانات عن محتوى ملفاتك: لا أسماء خطوط، ولا أحجام، ولا أي شيء مقروء من الملف.</p>
+</div>
+
+<div class="lx-en">
+<h1>Terms of use</h1>
+<p style="color:var(--warn)"><b>Note:</b> this text is a working draft summarising the tool's actual obligations. It has not been through legal review — have it checked before a public launch.</p>
+
+<h2>1 — Your right to modify the font</h2>
+<p>You confirm that you hold the right to modify every file you upload, under the licence you obtained with it. The tool reads what the foundry put inside the file and acts on it: if the <code>Restricted License Embedding</code> bit is set in <code>OS/2.fsType</code> the journey stops, and if the licence is the SIL Open Font License renaming is enforced. These are automated signals and do not replace your own responsibility: the absence of a signal is not permission.</p>
+
+<h2>2 — Local processing</h2>
+<p>All processing happens inside your browser. The tool does not receive, store, or transmit your files to any server, and there is no server to receive them. The technical constraints that make this true are described in <a href="details.html#privacy">How it works</a>.</p>
+
+<h2>3 — The currency artwork</h2>
+<p>The Saudi Riyal, UAE Dirham and Omani Rial symbols come from the issuing authorities (the Saudi Central Bank, the Central Bank of the UAE, the Central Bank of Oman) and are added unchanged rather than redrawn. Your use of them is governed by those authorities, not by this tool.</p>
+
+<h2>4 — No warranty</h2>
+<p>The tool is provided as is, with no warranty of any kind. The resulting file is your responsibility: yours to test before relying on it, and yours to confirm as fit for any commercial use you intend. The in-page verification report is an aid, not a certificate of fitness.</p>
+
+<h2>5 — The stamp inside the file</h2>
+<p>A note is added to the version record inside the file (nameID 5) saying that it was modified with this tool. The purpose is transparency for anyone inspecting it later: whoever opens the file can see it is not as the foundry shipped it.</p>
+
+<h2>6 — No tracking</h2>
+<p>No data is collected about the contents of your files: no font names, no sizes, nothing read from the file.</p>
+</div>
+
+<div class="about" id="about">
+  <h2><span class="lx-ar">عن المشروع</span><span class="lx-en">About</span></h2>
+  <p class="lx-ar">طوّرها <b class="author-name"></b> — مفتوحة المصدر برخصة MIT. المراجعة والاقتراحات والتحسينات مرحّب بها على GitHub.</p>
+  <p class="lx-en">Built by <b class="author-name"></b> — open source under the MIT licence. Review, suggestions and improvements are welcome on GitHub.</p>
+  <p class="project-links" id="project-links"></p>
+</div>
+</main>
+<script type="module" src="pages.js"></script>
+</body>
+</html>
