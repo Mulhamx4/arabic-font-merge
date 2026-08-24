@@ -12,6 +12,22 @@ selftest.html
 *.otf
 !examples/**/*.png
 
+# ...with one exception: the web tool's own interface font. It is a subset of
+# Readex Pro (OFL), shipped with its licence next to it, and the page cannot
+# render without it.
+!web/assets/ui/ReadexPro.woff2
+
+# Test fixtures the web tool builds locally — tests/fetch_fonts.sh rebuilds them
+tests/fonts/
+tests/out/
+tests/reference/
+.venv*/
+
+# The page builds this in the browser from the files already committed here;
+# a copy in the repository would only go stale.
+*.skill.zip
+arabic-font-merge-skill.zip
+
 # Python
 __pycache__/
 *.py[cod]
@@ -23,3 +39,4 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+.claude/

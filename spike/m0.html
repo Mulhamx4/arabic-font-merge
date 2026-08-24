@@ -1,0 +1,158 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>M0 — gate</title>
+<style>
+  body { font: 14px/1.6 ui-monospace, monospace; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+  #log { white-space: pre-wrap; }
+  .ok { color: #0a7d28 } .bad { color: #c0261c } .note { color: #666 }
+  h1 { font: 600 18px/1.4 system-ui }
+</style>
+<h1>M0 — can a browser tab build a font?</h1>
+<div id="log"></div>
+<script type="module">
+const L = document.getElementById('log');
+const t0 = performance.now();
+const say = (msg, cls = '') => {
+  const at = ((performance.now() - t0) / 1000).toFixed(1).padStart(5);
+  L.insertAdjacentHTML('beforeend', `<span class="${cls}">[${at}s] ${msg}</span>\n`);
+};
+const mb = n => (n / 1048576).toFixed(1) + ' MB';
+window.M0 = { done: false, results: {} };
+const record = (k, v) => { window.M0.results[k] = v; };
+
+const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.28.3/full/';
+
+try {
+  say('loading pyodide ' + PYODIDE);
+  const { loadPyodide } = await import(PYODIDE + 'pyodide.mjs');
+  const py = await loadPyodide({ indexURL: PYODIDE });
+  say('pyodide ready', 'ok');
+  record('pyodide', true);
+
+  say('loadPackage fonttools + brotli (from the same CDN, no PyPI)');
+  await py.loadPackage(['fonttools', 'brotli']);
+  const vers = py.runPython(`
+import fontTools, brotli
+f"fontTools {fontTools.version}, brotli present"`);
+  say(vers, 'ok');
+  record('fonttools', vers);
+
+  // fontkit.py is fetched as-is from the repo -- the whole point is that the
+  // browser runs the SAME code the local tool runs.
+  for (const f of ['fontkit.py']) {
+    const src = await (await fetch('/site/py/' + f)).text();
+    py.FS.writeFile('/home/pyodide/' + f, src);
+    say(`wrote ${f} (${src.length} bytes) into the pyodide FS`);
+  }
+  const svg = await (await fetch('/site/assets/saudi-riyal.svg')).text();
+  py.FS.writeFile('/home/pyodide/saudi-riyal.svg', svg);
+
+  const fontUrl = '/tests/fonts/plex-arabic/IBMPlexSansArabic-Regular.ttf';
+  const buf = new Uint8Array(await (await fetch(fontUrl)).arrayBuffer());
+  say(`fetched test font ${fontUrl} (${mb(buf.length)})`);
+  py.FS.writeFile('/home/pyodide/in.ttf', buf);
+
+  say('building: add U+20C1 + calt shortcuts …');
+  const tb = performance.now();
+  const out = py.runPython(`
+import sys, json, time
+sys.path.insert(0, '/home/pyodide')
+from fontTools.ttLib import TTFont
+import fontkit as fk
+
+t = time.time()
+font = TTFont('/home/pyodide/in.ttf')
+if not getattr(font['OS/2'], 'sCapHeight', 0):
+    font['OS/2'].sCapHeight = int(font['head'].unitsPerEm * 0.71)
+adv = fk.add_symbol_glyph(font, '/home/pyodide/saudi-riyal.svg', 0x20C1, 'uni20C1',
+                          cap_ratio=1.0, side_bearing=60)
+mapping = []
+for text in ('SAR', 'sar', 'ر.س.', 'ر.س'):
+    seq = fk.text_to_glyphs(font, text)
+    if seq:
+        mapping.append((seq, 'uni20C1'))
+feats = fk.add_shortcuts(font, mapping)
+fk.recalc_os2(font, extra_codepage_bits=(6,))
+font.save('/home/pyodide/out.ttf')
+build_s = time.time() - t
+
+# reopen and prove it landed
+chk = TTFont('/home/pyodide/out.ttf')
+res = {
+  'advance': adv,
+  'calt_features_patched': feats,
+  'in_cmap': 0x20C1 in chk.getBestCmap(),
+  'glyph_present': 'uni20C1' in chk.getGlyphOrder(),
+  'glyphs': len(chk.getGlyphOrder()),
+  'build_seconds': round(build_s, 2),
+}
+
+# brotli path: does woff2 actually write?
+try:
+    chk.flavor = 'woff2'
+    chk.save('/home/pyodide/out.woff2')
+    import os
+    res['woff2_bytes'] = os.path.getsize('/home/pyodide/out.woff2')
+except Exception as e:
+    res['woff2_error'] = repr(e)
+json.dumps(res)
+`);
+  const r = JSON.parse(out);
+  record('build', r);
+  say(`built in ${r.build_seconds}s (wall ${((performance.now() - tb) / 1000).toFixed(1)}s)`, 'ok');
+  say(`  U+20C1 in cmap: ${r.in_cmap} | glyph present: ${r.glyph_present} | advance ${r.advance} | glyphs ${r.glyphs}`,
+      r.in_cmap && r.glyph_present ? 'ok' : 'bad');
+  say(`  calt features patched: ${r.calt_features_patched}`, r.calt_features_patched ? 'ok' : 'bad');
+  say(r.woff2_bytes ? `  woff2 written: ${mb(r.woff2_bytes)} — brotli WORKS` : `  woff2 FAILED: ${r.woff2_error}`,
+      r.woff2_bytes ? 'ok' : 'bad');
+
+  // Hand the bytes back to JS and render with them -- the real proof.
+  const bytes = py.FS.readFile('/home/pyodide/out.ttf');
+  const blob = new Blob([bytes], { type: 'font/ttf' });
+  const url = URL.createObjectURL(blob);
+  // random family name: a same-named installed font would otherwise win
+  const face = new FontFace('PF_x7k2', `url(${url})`);
+  await face.load();
+  document.fonts.add(face);
+  say(`font loaded into the page as @font-face 'PF_x7k2' (${mb(bytes.length)})`, 'ok');
+
+  // dependency-free shaping check: does calt actually fire in THIS browser?
+  const c = document.createElement('canvas').getContext('2d');
+  const width = (text, calt) => {
+    c.font = `48px PF_x7k2`;
+    c.fontVariantCaps = 'normal';
+    // canvas2d has no font-feature-settings, so measure in the DOM instead
+    const s = document.createElement('span');
+    s.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font:48px PF_x7k2;font-feature-settings:${calt ? '"calt" 1' : '"calt" 0'}`;
+    s.textContent = text;
+    document.body.appendChild(s);
+    const w = s.getBoundingClientRect().width;
+    s.remove();
+    return w;
+  };
+  const probe = t => ({ on: width(t, true), off: width(t, false) });
+  const fires = probe('SAR');
+  const guard = probe('SARAH');
+  const changed = Math.abs(fires.on - fires.off) > 0.5;
+  const guarded = Math.abs(guard.on - guard.off) < 0.5;
+  record('shaping', { fires, guard, changed, guarded });
+  say(`  "SAR"   calt on ${fires.on.toFixed(1)}px vs off ${fires.off.toFixed(1)}px  -> shortcut ${changed ? 'FIRED' : 'did NOT fire'}`, changed ? 'ok' : 'bad');
+  say(`  "SARAH" calt on ${guard.on.toFixed(1)}px vs off ${guard.off.toFixed(1)}px  -> guard ${guarded ? 'HELD' : 'BROKEN'}`, guarded ? 'ok' : 'bad');
+
+  const memOk = performance.memory
+    ? `heap ${mb(performance.memory.usedJSHeapSize)} / limit ${mb(performance.memory.jsHeapSizeLimit)}`
+    : 'performance.memory unavailable (Safari/Firefox) — size limits alone will govern';
+  say(memOk, 'note');
+  record('memory', memOk);
+
+  const pass = r.in_cmap && r.glyph_present && r.calt_features_patched && r.woff2_bytes && changed && guarded;
+  say('\n' + (pass ? 'M0 PASS — a browser tab built a real font with the symbol in it.'
+                   : 'M0 FAIL — see red lines above.'), pass ? 'ok' : 'bad');
+  record('pass', pass);
+} catch (e) {
+  say('EXCEPTION ' + (e && e.stack || e), 'bad');
+  record('pass', false);
+  record('error', String(e));
+}
+window.M0.done = true;
+</script>

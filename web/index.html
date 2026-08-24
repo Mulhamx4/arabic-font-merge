@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- The privacy claim is enforced here, not just written in the copy.
+     `connect-src` allows this origin and the Pyodide CDN and nothing else, so
+     even injected script has nowhere to send a font. `form-action 'none'`
+     means no form can post anywhere at all. The worker revokes its own network
+     access on top of this once the font is loaded -- see details.html.
+
+     `frame-ancestors` is deliberately absent: a <meta> CSP cannot carry it, so
+     it belongs in the host's response headers. deploy/headers has it. -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval';
+  worker-src 'self' blob:;
+  connect-src 'self' https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline';
+  font-src 'self' blob: data:;
+  img-src 'self' data: blob:;
+  object-src 'none';
+  base-uri 'none';
+  form-action 'none';
+">
+
+<title>أداة دمج الخطوط وإضافة رموز العملات</title>
+<meta name="description" content="دمج عائلة خطوط في ملف واحد وإضافة رموز الريال السعودي والدرهم الإماراتي والريال العماني — كل المعالجة داخل متصفحك.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>﷼</text></svg>">
+<link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<a class="skip-link" href="#main" data-i18n="a11y.skip">تخطَّ إلى المحتوى</a>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand" data-i18n-html="brand"></div>
+    <button class="ghost" id="lang-toggle" type="button">English</button>
+    <button class="ghost" id="theme-toggle" type="button" aria-live="polite">
+      <span data-i18n="theme.toggle">المظهر</span>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+
+  <section class="intro">
+    <h1 data-i18n="intro.title"></h1>
+    <p data-i18n="intro.lede"></p>
+    <div class="privacy-line">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M8 1.5 3 3.6v3.6c0 3 2.1 5.8 5 6.8 2.9-1 5-3.8 5-6.8V3.6L8 1.5Z"
+              stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="m5.9 8 1.5 1.5L10.3 6.6" stroke="currentColor" stroke-width="1.3"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span data-i18n-html="intro.privacy"></span>
+    </div>
+  </section>
+
+  <!-- ============================================== stage 1 — upload ==== -->
+  <section class="stage" id="stage-1" data-state="active" data-stage="1">
+    <button class="stage-head" type="button">
+      <span class="stage-num">1</span>
+      <span class="stage-title" data-i18n="s1.title"></span>
+      <span class="stage-summary" id="s1-summary"></span>
+    </button>
+    <div class="stage-body">
+      <div class="drop" id="drop">
+        <strong data-i18n="s1.drop">اسحب ملفات الخط هنا</strong>
+        <p data-i18n="s1.dropSub"></p>
+        <p><button class="btn secondary" type="button" id="pick" data-i18n="s1.pick"></button></p>
+        <input type="file" id="file-input" multiple accept=".ttf,.otf,.TTF,.OTF" class="sr-only">
+      </div>
+      <p class="engine-status" id="engine-status" aria-live="polite"></p>
+      <div id="s1-out" aria-live="polite"></div>
+      <button class="btn" id="s1-next" type="button" hidden data-i18n="s1.continue"></button>
+    </div>
+  </section>
+
+  <!-- ============================================= stage 2 — consent ==== -->
+  <section class="stage" id="stage-2" data-state="locked" data-stage="2">
+    <button class="stage-head" type="button">
+      <span class="stage-num">2</span>
+      <span class="stage-title" data-i18n="s2.title"></span>
+      <span class="stage-summary" id="s2-summary"></span>
+    </button>
+    <div class="stage-body">
+      <p class="recap" id="s2-recap"></p>
+      <div id="s2-license"></div>
+      <div id="s2-consent">
+        <ul class="steps" id="s2-points"></ul>
+        <label class="card" style="margin-block:1rem">
+          <span class="card-head">
+            <input type="checkbox" id="agree">
+            <b data-i18n="s2.agree"></b>
+          </span>
+          <small data-i18n-html="s2.agreeSub"></small>
+        </label>
+        <button class="btn" id="s2-next" type="button" disabled data-i18n="s2.next"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================= stage 3 — options ==== -->
+  <section class="stage" id="stage-3" data-state="locked" data-stage="3">
+    <button class="stage-head" type="button">
+      <span class="stage-num">3</span>
+      <span class="stage-title" data-i18n="s3.title"></span>
+      <span class="stage-summary" id="s3-summary"></span>
+    </button>
+    <div class="stage-body">
+      <div id="s3-route"></div>
+
+      <h3 class="sr-only" data-i18n="s3.currencies"></h3>
+      <div class="cards" id="currency-cards"></div>
+
+      <div id="custom-currencies"></div>
+      <div id="custom-form-host"></div>
+      <p><button class="btn secondary" type="button" id="add-currency"
+                 data-i18n="s3.addCurrencyBtn"></button></p>
+
+      <div class="cards" id="feature-cards" style="margin-block-start:.75rem"></div>
+
+      <div id="rename-field" class="field" hidden>
+        <label for="rename" data-i18n="s3.rename"></label>
+        <input type="text" id="rename" maxlength="24" autocomplete="off" spellcheck="false">
+        <small id="rename-hint"></small>
+        <label class="override" id="rename-override-row" hidden>
+          <input type="checkbox" id="rename-override">
+          <span>
+            <b data-i18n="s3.renameOverride"></b>
+            <small data-i18n="s3.renameOverrideWhy"></small>
+          </span>
+        </label>
+        <div id="rename-override-note"></div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="format" data-i18n="s3.format"></label>
+          <select id="format"></select>
+          <small id="format-hint"></small>
+        </div>
+        <div class="field">
+          <label for="version" data-i18n="s3.version"></label>
+          <input type="number" id="version" step="0.001" min="1" value="2.000">
+          <small data-i18n="s3.versionHint"></small>
+        </div>
+      </div>
+
+      <button class="btn big" id="build" type="button" data-i18n="s3.build"></button>
+    </div>
+  </section>
+
+  <!-- ================================== stage 4 — preview and verify ==== -->
+  <section class="stage" id="stage-4" data-state="locked" data-stage="4">
+    <button class="stage-head" type="button">
+      <span class="stage-num">4</span>
+      <span class="stage-title" data-i18n="s4.title"></span>
+      <span class="stage-summary" id="s4-summary"></span>
+    </button>
+    <div class="stage-body">
+      <div id="build-progress" hidden>
+        <div class="progress-line">
+          <span id="progress-label"></span>
+          <span id="progress-pct" class="num">0%</span>
+        </div>
+        <div class="bar"><i id="progress-fill"></i></div>
+        <div role="status" aria-live="polite" class="sr-only" id="progress-sr"></div>
+        <button class="btn danger" id="cancel" type="button" data-i18n="s4.cancel"></button>
+      </div>
+
+      <div id="preview-area" hidden>
+        <div class="preview-shell">
+          <textarea class="preview-input" id="preview-text" rows="2"
+                    spellcheck="false" aria-label="preview"></textarea>
+          <div class="preview-controls">
+            <label for="weight-slider" data-i18n="s4.weight"></label>
+            <input type="range" id="weight-slider" min="0" max="0" step="1" value="0">
+            <span id="weight-label" class="num"></span>
+            <label for="size-slider" data-i18n="s4.size"></label>
+            <input type="range" id="size-slider" min="14" max="72" step="1" value="30">
+          </div>
+        </div>
+        <div class="samples" id="samples"></div>
+
+        <div class="weights-panel">
+          <b data-i18n="s4.acrossWeights"></b>
+          <p style="margin:.2rem 0 0;color:var(--ink-faint);font-size:.85rem"
+             data-i18n="s4.acrossWeightsWhy"></p>
+          <div class="weights-grid" id="weights-grid"></div>
+        </div>
+      </div>
+
+      <div id="verify-area" hidden>
+        <b data-i18n="s4.report"></b>
+        <p style="margin:.2rem 0 0;color:var(--ink-faint);font-size:.85rem"
+           data-i18n="s4.reportWhy"></p>
+        <div class="report" id="report" aria-live="polite"></div>
+        <button class="btn big" id="to-download" type="button"
+                style="margin-block-start:1rem" data-i18n="s4.next"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ stage 5 — download ==== -->
+  <section class="stage" id="stage-5" data-state="locked" data-stage="5">
+    <button class="stage-head" type="button">
+      <span class="stage-num">5</span>
+      <span class="stage-title" data-i18n="s5.title"></span>
+      <span class="stage-summary" id="s5-summary"></span>
+    </button>
+    <div class="stage-body">
+      <div id="conflict-warning"></div>
+      <div class="downloads" id="downloads"></div>
+
+      <h3 style="font-size:.95rem;margin-block:1.5rem .2rem" data-i18n="s5.install"></h3>
+      <div class="os-tabs" id="os-tabs" role="tablist"></div>
+      <ol class="steps" id="install-steps"></ol>
+
+      <div class="note info" style="margin-block-start:1.25rem">
+        <span>
+          <p><b data-i18n="s5.selftestTitle"></b></p>
+          <p data-i18n="s5.selftestBody"></p>
+          <p><button class="btn secondary" id="dl-selftest" type="button"
+                     data-i18n="s5.selftestBtn"></button></p>
+        </span>
+      </div>
+
+      <p style="margin-block-start:1.5rem">
+        <button class="ghost" id="restart" type="button" data-i18n="s5.restart"></button>
+      </p>
+    </div>
+  </section>
+
+  <section class="skill-block" id="skill-block">
+    <h2 data-i18n="skill.title"></h2>
+    <p data-i18n="skill.body"></p>
+    <p>
+      <button class="btn" type="button" id="dl-skill" data-i18n="skill.download"></button>
+      <a class="ghost" id="skill-repo" href="#" target="_blank" rel="noopener noreferrer"
+         data-i18n="skill.repo"></a>
+    </p>
+    <p id="skill-status" aria-live="polite"></p>
+    <h3 data-i18n="skill.installTitle"></h3>
+    <p class="skill-install" data-i18n-html="skill.installCode"></p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="about">
+      <h2 data-i18n="about.title"></h2>
+      <p id="about-by"></p>
+      <p data-i18n="about.invite"></p>
+      <p class="project-links" id="project-links"></p>
+    </div>
+    <p data-i18n-html="foot.links"></p>
+    <p data-i18n="about.thirdParty"></p>
+    <p data-i18n="foot.note"></p>
+  </div>
+</footer>
+
+<template id="tpl-report-row">
+  <div class="report-row">
+    <span class="who"></span>
+    <span class="what"></span>
+  </div>
+</template>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

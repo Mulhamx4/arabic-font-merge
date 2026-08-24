@@ -52,6 +52,44 @@ For [Cowork](https://claude.ai) or the Claude apps, zip the repository contents 
 cd arabic-font-merge && zip -r ../arabic-font-merge.skill . -x '.git/*' 'examples/*'
 ```
 
+### In a browser — no install at all
+
+`web/` is the same engine running inside a browser tab through
+[Pyodide](https://pyodide.org/). No server, no upload, no account: the font is
+processed on the visitor's own machine, and the page is technically prevented
+from sending it anywhere.
+
+```bash
+python3 -m http.server 8412     # from the repository root
+# then open http://localhost:8412/web/
+```
+
+It serves from the repository root because the page loads `scripts/` and
+`assets/` directly — the browser and the command line run the same code, so a
+fix in `fontkit.py` reaches both.
+
+To host it, publish the repository and point people at `/web/`. Copy
+[`web/deploy/headers`](web/deploy/headers) to `_headers` at the site root so the
+one CSP directive a `<meta>` tag cannot carry is served properly.
+
+The page also builds the skill archive for you, in the browser, from the files
+committed here — so what you download is always what is in the repository.
+
+**What the browser adds over the command line**
+
+- **A route decided by the file, not the user.** A variable font gets a
+  symbols-only path with its `HVAR` advance variation neutralised; a font with
+  the `fsType` Restricted bit is refused outright.
+- **Differential verification.** The result is compared against your source, so
+  a gap that was already there is not reported as breakage we caused.
+- **A currency of your own.** For a currency Unicode has not encoded, upload the
+  official artwork and pick a codepoint — defaulted to the Private Use Area, and
+  refused if it would overwrite a glyph you already have. See
+  [NOTICE.md](NOTICE.md#currency-artwork-you-supply-yourself).
+
+**What the command line still does better:** no size ceiling, real HarfBuzz
+verification, `proof.png`, and scripting.
+
 ### As a command-line tool
 
 ```bash
@@ -203,6 +241,14 @@ references/opentype-notes.md
 tests/make_test_font.py     builds a synthetic family so CI needs no font binary
 tests/check_manifest.py     validates currencies.json against the artwork
 evals/evals.json            skill evaluation cases
+
+web/index.html              the browser tool — five stages, Arabic and English
+web/app.js                  stage and state management, preview, shaping probe
+web/worker.js               Pyodide, and the network lockdown
+web/py/web_build.py         the only Python that exists solely for the browser
+web/project.js              author and contact links — the X handle lives here
+web/PLAN.ar.md              the design plan the browser tool was built from
+tests/run_all.sh            every check for the browser tool, in one command
 ```
 
 ## Contributing

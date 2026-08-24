@@ -52,6 +52,28 @@ jobs:
       - name: Proof page (HTML only; no browser in CI)
         run: python scripts/make_proof.py build/SmokeTest.ttc --out build/ --no-png
 
+      # The browser tool in web/ loads scripts/ and assets/ directly, so a change
+      # to either can break it. Everything below is headless and, like the rest
+      # of this workflow, downloads nothing: the fixtures are derived from the
+      # synthetic family built above. The richer corpora (Arabic coverage, CFF
+      # outlines, a variable font) need real fonts, and those tests say so and
+      # skip rather than pretending to have run.
+      - name: Web tool — theme contrast, i18n hygiene, JavaScript syntax
+        run: |
+          node tests/test_contrast.js
+          node tests/check_js.mjs
+
+      - name: Web tool — engine, licence rules, Arabic names, custom currency
+        run: |
+          python tests/run_engine.py all
+          python tests/test_license_rules.py
+          python tests/test_arabic_names.py
+          python tests/test_custom_currency.py
+          python tests/test_variable_advance.py
+
+      - name: Web tool — parity with the command-line build
+        run: python tests/test_parity.py tests/fonts
+
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
