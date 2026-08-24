@@ -58,13 +58,7 @@ def advances(path):
 
 
 def main():
-    if SRC is None:
-        # No synthetic substitute exists: the bug lives in HVAR, and building a
-        # variable font with a populated delta store purely to test it would be
-        # testing our own construction rather than fontTools' behaviour.
-        print("SKIPPED: no variable-font fixture. Run tests/fetch_fonts.sh to "
-              "download one; this check cannot run without it.")
-        return 0
+    print(f"fixture: {os.path.relpath(SRC, ROOT)}")
     build("/tmp/vf_naive.ttf", fix=False)
     build("/tmp/vf_fixed.ttf", fix=True)
     naive, fixed = advances("/tmp/vf_naive.ttf"), advances("/tmp/vf_fixed.ttf")
@@ -75,8 +69,11 @@ def main():
     print(f"  with the fix:    {f_vals}")
 
     if len(n_vals) == 1:
-        print("\nINCONCLUSIVE: this font does not reproduce the inheritance bug; "
-              "the test proves nothing today.")
+        # A fixture that stopped reproducing would make this test pass for the
+        # wrong reason, so it is a failure rather than a pass.
+        print("\nINCONCLUSIVE: this fixture does not reproduce the inheritance "
+              "bug, so the test proves nothing. Check that the last glyph of "
+              "the order still carries a non-zero advance delta.")
         return 1
     if len(f_vals) != 1:
         print("\nFAIL: the symbol's advance still varies across the design space.")

@@ -38,11 +38,29 @@ def base_family():
 
 
 def variable_font():
-    """The variable fixture, or None. There is no synthetic substitute: the bug
-    it guards lives in HVAR, and building a variable font with a populated
-    HVAR delta store just to test it would be testing our own construction."""
-    p = os.path.join(FONTS, "variable", "ReadexPro[HEXP,wght].ttf")
-    return p if os.path.exists(p) else None
+    """A variable font whose last glyph carries a non-zero advance delta.
+
+    Prefers the downloaded Readex Pro, which is where the bug was found in the
+    wild. Falls back to a synthetic one built by `make_variable_font.py`, so
+    the check runs in CI where nothing is downloaded.
+
+    The synthetic font is not a stand-in for a real typeface -- it exists to
+    recreate one specific arrangement: `VarIdxMap.postRead` pads a short map by
+    repeating its last entry, so the trap is simply that the final glyph of the
+    order points at a non-zero delta row. `test_variable_advance.py` refuses to
+    pass if the unfixed path does not actually drift, so a fixture that stopped
+    reproducing would be reported rather than quietly turning the test green.
+    """
+    real = os.path.join(FONTS, "variable", "ReadexPro[HEXP,wght].ttf")
+    if os.path.exists(real):
+        return real
+    synthetic = os.path.join(FONTS, "variable", "SmokeTestVF.ttf")
+    if not os.path.exists(synthetic):
+        os.makedirs(os.path.dirname(synthetic), exist_ok=True)
+        subprocess.run([sys.executable,
+                        os.path.join(ROOT, "tests", "make_variable_font.py"),
+                        os.path.dirname(synthetic)], check=True, capture_output=True)
+    return synthetic
 
 
 def using_real_fonts():

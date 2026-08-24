@@ -235,8 +235,17 @@ assets/*.svg                الرسوم الرسمية
 references/troubleshooting.md
 references/opentype-notes.md
 tests/make_test_font.py     يبني عائلة اصطناعية حتى لا يحتاج CI أي ملف خط
+tests/make_variable_font.py يبني خطًا متغيّرًا اصطناعيًا يعيد إنتاج فخّ HVAR
 tests/check_manifest.py     يتحقق من تطابق currencies.json مع الرسوم
 evals/evals.json            حالات تقييم المهارة
+
+web/index.html              أداة المتصفح — خمس مراحل، عربي وإنجليزي
+web/app.js                  إدارة المراحل والحالة والمعاينة وفحص التنضيد
+web/worker.js               Pyodide، وقطع الشبكة داخل المحرّك
+web/py/web_build.py         البايثون الوحيد الموجود للمتصفح فقط
+web/project.js              المطوّر وروابط التواصل — معرّف الحساب هنا
+web/PLAN.ar.md              الخطة التي بُنيت منها أداة المتصفح
+tests/run_all.sh            كل فحوص أداة المتصفح بأمر واحد
 ```
 
 ## المساهمة
