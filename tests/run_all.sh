@@ -42,6 +42,7 @@ if not bad:
 sys.exit(bad)
 EOF
 step "javascript parses" node tests/check_js.mjs
+step "markdown links and anchors resolve" $PY tests/check_docs.py
 step "variable-font advance regression (HVAR)" $PY tests/test_variable_advance.py
 step "engine, all four corpora" bash -c "$PY tests/run_engine.py all 2>&1 | tail -3"
 for corpus in plex-arabic plex-cff mixed-italic; do

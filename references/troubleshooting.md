@@ -9,15 +9,20 @@ early items are cheap and catch most cases.
 - [The symbol is not in the character map](#the-symbol-is-not-in-the-character-map)
 - [Nothing changed after installing](#nothing-changed-after-installing)
 - [Extra space around a glyph](#extra-space-around-a-glyph)
+- [The symbol's width changes with the weight axis](#the-symbols-width-changes-with-the-weight-axis)
 - [Shortcuts do not substitute](#shortcuts-do-not-substitute)
+- [Windows shows no "Install" option](#windows-shows-no-install-option)
 - [Per-application notes](#per-application-notes)
 - [The family is scattered across the font menu](#the-family-is-scattered-across-the-font-menu)
 - [Arabic renders in the wrong font](#arabic-renders-in-the-wrong-font)
 
 ## Step 0: is it the file at all?
 
-Have them open `selftest.html` (from `make_proof.py`) in any browser. The font is
-embedded as base64, so installation is irrelevant.
+Have them open `selftest.html` in any browser. The font is embedded as base64,
+so installation is irrelevant. `make_proof.py` writes one, and so does the
+browser tool at <https://mulhamx4.github.io/arabic-font-merge/> — if the user
+has the built file but no Python, that page will produce the self-test for them
+without installing anything.
 
 - **Green banner** → the file is correct. Everything below the fold is an install,
   cache, or application problem. Stop inspecting the font.
@@ -25,6 +30,11 @@ embedded as base64, so installation is irrelevant.
 
 Doing this first saves the round trips. It is the single most useful artifact to
 hand over with a font.
+
+If you cannot reproduce what they are seeing at all, having them run the file
+through <https://mulhamx4.github.io/arabic-font-merge/> is often faster than a
+round of questions: its verification report compares the file against its own
+source and names any codepoint, symbol or advance that regressed.
 
 ## The symbol is not in the character map
 
@@ -84,6 +94,20 @@ a space the user typed. `--side-bearing 24` if they still want it tighter.
 Also remember that a typed space stays a space. `OMR 10.500` becomes
 `⃄ 10.500` — symbol, full word space, number. That gap belongs to their text, not
 the font. (The Central Bank's own guideline does put a space there.)
+
+## The symbol's width changes with the weight axis
+
+Only possible in a variable font, and it means the glyph was appended without
+neutralising `HVAR` — it inherited the delta row of whatever glyph was last in
+the order. See [Adding a glyph to a variable
+font](opentype-notes.md#adding-a-glyph-to-a-variable-font).
+
+Two things make this hard to catch. It is invisible to `fontTools`, because
+instancing rebuilds `hmtx` from `gvar` phantom points, so a generated instance
+measures correct while the variable font is wrong. And it is often small — two
+units in the case that prompted the fix — so it reads as a rendering quirk
+rather than a defect. Measure the glyph's advance through HarfBuzz at several
+points on each axis; a correct symbol does not move at all.
 
 ## Shortcuts do not substitute
 
