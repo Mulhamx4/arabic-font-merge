@@ -10,6 +10,13 @@
 #
 # Netlify/Cloudflare Pages read this file as `_headers`. Copy it to that name at
 # the site root. The nginx equivalent is in deploy/nginx.conf.
+#
+# GitHub Pages serves NO custom headers, so none of this reaches a visitor
+# there. Everything except `frame-ancestors` still applies, because the page
+# carries it in its own <meta> CSP; `frame-ancestors` is the one directive a
+# meta tag cannot express. web/app.js therefore refuses to run inside a frame,
+# which is the standard substitute when headers are unavailable. Host here for
+# convenience; host somewhere that serves headers for the stronger guarantee.
 
 /*
   Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' blob: data:; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'

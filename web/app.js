@@ -1217,9 +1217,33 @@ function wire() {
   }
 }
 
+/* `frame-ancestors` is the one CSP directive a <meta> tag cannot carry, and
+   GitHub Pages serves no custom headers, so on that host nothing stops another
+   site from framing this page. Refusing to run inside a frame is the standard
+   substitute. It is left as a visible link rather than a silent redirect, so a
+   framed visitor understands what happened instead of watching the page blank.
+
+   Hosts that do serve headers get the real directive from deploy/headers, and
+   this check then never fires. */
+function refuseFraming() {
+  if (window.top === window.self) return false;
+  document.body.textContent = '';
+  const link = el('a', { href: location.href, target: '_blank',
+                         rel: 'noopener noreferrer' }, location.href);
+  document.body.append(el('div', {
+    style: 'font:16px/1.7 system-ui,sans-serif;max-width:34rem;margin:4rem auto;' +
+           'padding:0 1.5rem;text-align:center',
+  },
+    el('p', {}, 'هذه الأداة لا تعمل داخل إطار مضمَّن. افتحها مباشرة:'),
+    el('p', { lang: 'en', dir: 'ltr' }, 'This tool does not run inside a frame. Open it directly:'),
+    el('p', {}, link)));
+  return true;
+}
+
 /* ------------------------------------------------------------------ init */
 
 (async function init() {
+  if (refuseFraming()) return;
   await setLang(localStorage.getItem('lang') || 'ar');
   setTheme(localStorage.getItem('theme') || 'system');
   wire();

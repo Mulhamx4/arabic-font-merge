@@ -52,6 +52,25 @@ pip install fonttools brotli uharfbuzz
 cd arabic-font-merge && zip -r ../arabic-font-merge.skill . -x '.git/*' 'examples/*'
 ```
 
+### مستضافة، بلا أي تثبيت
+
+الأداة منشورة من هذا المستودع على
+**<https://mulhamx4.github.io/arabic-font-merge/>**.
+
+يقدّمها GitHub Pages من الفرع مباشرة، ولهذا يوجد `.nojekyll` في الجذر: الموقع
+ملفات ثابتة صِرفة، وJekyll لن يزيد على أن يعبث بها. و`index.html` في الجذر
+يحوّل إلى `web/`، لأن الأداة تقرأ `scripts/` و`assets/` من جذر المستودع فلا
+تصلح هي نفسها أن تكون جذر الموقع.
+
+وتحفّظ واحد يجب قوله: **GitHub Pages لا يقدّم أي ترويسات مخصّصة.** كل توجيهات
+CSP التي تحتاجها الصفحة تسافر داخل وسم `<meta>` الخاص بها وتظل نافذة —
+`connect-src` و`form-action` و`object-src` وغيرها — إلا `frame-ancestors` فلا
+يمكن التعبير عنه هناك، فلا شيء على مستوى الترويسات يمنع موقعًا آخر من تأطير
+الصفحة على هذا المستضيف. ولهذا يرفض `web/app.js` العمل داخل إطار مضمَّن، وهو
+البديل المتعارف عليه حين تتعذّر الترويسات. والاستضافة على Netlify أو Cloudflare
+Pages أو nginx خاص بك تعطيك التوجيه الحقيقي من
+[`web/deploy/headers`](web/deploy/headers).
+
 ### في المتصفح — بلا تثبيت أصلًا
 
 مجلد `web/` هو المحرّك نفسه يعمل داخل تبويب متصفح عبر

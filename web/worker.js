@@ -46,8 +46,11 @@ function severNetwork() {
 
 async function verifyLockdown() {
   // Claiming it is not the same as showing it, so prove the stub actually bites.
+  // The target is a real same-origin file, relative to this worker: if the stub
+  // somehow failed to take, the request succeeds and we report the truth rather
+  // than a 404 that happens to look like a block.
   try {
-    await self.fetch('/site/index.html');
+    await self.fetch('py/web_build.py');
     return false;
   } catch (e) {
     return true;

@@ -52,6 +52,26 @@ For [Cowork](https://claude.ai) or the Claude apps, zip the repository contents 
 cd arabic-font-merge && zip -r ../arabic-font-merge.skill . -x '.git/*' 'examples/*'
 ```
 
+### Hosted, with nothing to install
+
+The tool is published from this repository at
+**<https://mulhamx4.github.io/arabic-font-merge/>**.
+
+GitHub Pages serves it straight from the branch, which is why `.nojekyll` sits
+at the root: the site is plain static files, and Jekyll would only try to
+process them. The root `index.html` forwards to `web/`, because the tool loads
+`scripts/` and `assets/` from the repository root and so cannot itself be the
+site root.
+
+One honest caveat: **GitHub Pages serves no custom response headers.** Every CSP
+directive the page needs travels in its own `<meta>` tag and still applies —
+`connect-src`, `form-action`, `object-src` and the rest — but `frame-ancestors`
+cannot be expressed there, so on this host nothing at the header level stops
+another site from framing the page. `web/app.js` refuses to run inside a frame
+as the standard substitute. Hosting on Netlify, Cloudflare Pages or your own
+nginx gives you the real directive from
+[`web/deploy/headers`](web/deploy/headers).
+
 ### In a browser — no install at all
 
 `web/` is the same engine running inside a browser tab through
