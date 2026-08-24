@@ -2,7 +2,7 @@
    tool, read from the same localStorage keys. No i18n dictionary here -- the
    prose exists twice in the markup and the root's lang attribute selects it. */
 
-import { projectLinks } from './project.js';
+import { PROJECT, projectLinks } from './project.js';
 
 const root = document.documentElement;
 
@@ -12,7 +12,14 @@ function applyLang(lang) {
   localStorage.setItem('lang', lang);
   const btn = document.querySelector('#lang-toggle');
   if (btn) btn.textContent = lang === 'ar' ? 'English' : 'العربية';
+  renderAuthor();
   renderProjectLinks(lang);
+}
+
+function renderAuthor() {
+  for (const node of document.querySelectorAll('.author-name')) {
+    node.textContent = PROJECT.author;
+  }
 }
 
 function renderProjectLinks(lang) {

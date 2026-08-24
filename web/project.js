@@ -1,16 +1,21 @@
 /* Who made this and where to reach them. Kept in one file so the footer, the
    prose pages, and the README stay in step.
  *
- * ── EDIT ME ──────────────────────────────────────────────────────────────
- * Set `x` to your X/Twitter handle WITHOUT the leading @, e.g. 'mulhamx4'.
- * Leave it as an empty string and the X link simply does not render, rather
- * than shipping a link to whoever happens to own that handle.
+ * `author` is the person, as named in LICENSE. `HANDLE` is the account, and
+ * every URL is built from it so the two cannot drift apart -- change the handle
+ * in one place and the repository, profile and X links all follow.
+ *
+ * Set `x` to '' if you would rather not link an X account; the link then simply
+ * does not render, instead of shipping a link to whoever owns that handle.
  */
+const HANDLE = 'Mulhamx4';
+
 export const PROJECT = {
-  author: 'Mulhamx4',
-  repo: 'https://github.com/Mulhamx4/arabic-font-merge',
-  github: 'https://github.com/Mulhamx4',
-  x: 'Mulhamx4',              // X handle, no @
+  author: 'Mulham',
+  handle: HANDLE,
+  repo: `https://github.com/${HANDLE}/arabic-font-merge`,
+  github: `https://github.com/${HANDLE}`,
+  x: HANDLE,                  // X handle, no @
   license: 'MIT',
 };
 
