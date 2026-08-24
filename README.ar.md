@@ -235,7 +235,7 @@ assets/*.svg                الرسوم الرسمية
 references/troubleshooting.md
 references/opentype-notes.md
 tests/make_test_font.py     يبني عائلة اصطناعية حتى لا يحتاج CI أي ملف خط
-tests/make_variable_font.py يبني خطًا متغيّرًا اصطناعيًا يعيد إنتاج فخّ HVAR
+tests/make_variable_test_font.py يبني خطًا متغيّرًا اصطناعيًا يعيد إنتاج فخّ HVAR
 tests/check_manifest.py     يتحقق من تطابق currencies.json مع الرسوم
 evals/evals.json            حالات تقييم المهارة
 

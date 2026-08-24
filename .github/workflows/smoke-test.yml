@@ -30,9 +30,14 @@ jobs:
         run: python tests/check_manifest.py
 
       # No font is committed to this repository (see NOTICE.md), and downloading
-      # one would make CI depend on somebody else's uptime, so we generate one.
-      - name: Generate a synthetic test family
-        run: python tests/make_test_font.py tests/fonts
+      # one would make CI depend on somebody else's uptime, so we generate them:
+      # a two-weight static family, and a variable font carrying the fvar, gvar
+      # and HVAR that the advance-inheritance check needs. Both land where the
+      # non-recursive scans below will not mistake one for the other.
+      - name: Generate the synthetic test fonts
+        run: |
+          python tests/make_test_font.py tests/fonts
+          python tests/make_variable_test_font.py tests/fonts/variable
 
       - name: Survey
         run: python scripts/inspect_fonts.py tests/fonts
@@ -55,10 +60,10 @@ jobs:
       # The browser tool in web/ loads scripts/ and assets/ directly, so a change
       # to either can break it. Everything below is headless and, like the rest
       # of this workflow, downloads nothing: the fixtures are derived from the
-      # synthetic family built above, and make_variable_font.py builds a variable
-      # one on demand. What still needs real fonts is the richer corpora --
-      # Arabic coverage, CFF outlines, an italic without Arabic -- and those
-      # tests name what they skipped rather than pretending to have run.
+      # synthetic fonts built above. What still needs real fonts is the richer
+      # corpora -- Arabic coverage, CFF outlines, an italic without Arabic --
+      # and those tests name what they skipped rather than pretending to have
+      # run.
       - name: Web tool — theme contrast, i18n hygiene, JavaScript syntax
         run: |
           node tests/test_contrast.js

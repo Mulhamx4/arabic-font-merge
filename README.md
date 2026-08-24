@@ -239,7 +239,7 @@ assets/*.svg                official artwork
 references/troubleshooting.md
 references/opentype-notes.md
 tests/make_test_font.py     builds a synthetic family so CI needs no font binary
-tests/make_variable_font.py builds a synthetic variable font that reproduces the HVAR trap
+tests/make_variable_test_font.py builds a synthetic variable font that reproduces the HVAR trap
 tests/check_manifest.py     validates currencies.json against the artwork
 evals/evals.json            skill evaluation cases
 

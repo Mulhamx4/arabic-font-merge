@@ -32,7 +32,7 @@ with the command-line build, the licence rules, Arabic family names, custom
 currency artwork, and `fsType` blocking.
 
 Without `tests/fetch_fonts.sh` the fixtures fall back to synthetic fonts —
-`make_test_font.py` for the static family and `make_variable_font.py` for a
+`make_test_font.py` for the static family and `make_variable_test_font.py` for a
 variable one — so every check still runs. What skips is the richer *corpora*,
 and those tests name what they skipped rather than pretending to have run. That
 is what CI does.
