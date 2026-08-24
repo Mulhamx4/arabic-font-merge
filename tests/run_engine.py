@@ -66,8 +66,14 @@ CORPORA = {
 if __name__ == "__main__":
     sel = sys.argv[1] if len(sys.argv) > 1 else "all"
     chosen = CORPORA if sel == "all" else {sel: CORPORA[sel]}
-    total, ran, skipped = 0, 0, []
+    total, ran, static_ran, skipped = 0, 0, 0, []
     for label, folder in chosen.items():
+        # The variable corpus has a synthetic fallback, so materialise it rather
+        # than skipping: the symbols-only route is a distinct code path -- it is
+        # where HVAR neutralisation runs inside a real build -- and CI should
+        # exercise it, not just the isolated unit test.
+        if label == "vf":
+            fixtures.variable_font()
         path = os.path.join(HERE, "fonts", folder)
         if not (os.path.isdir(path) and any(
                 f.lower().endswith((".ttf", ".otf")) for f in os.listdir(path))):
@@ -76,13 +82,17 @@ if __name__ == "__main__":
         res = run(label, path)
         total += res["failures"]
         ran += 1
+        if label != "vf":
+            static_ran += 1
 
-    # Never report success without having built anything: fall back to whatever
-    # font is available, which in CI is the synthetic family.
-    if ran == 0:
+    # The merge route and the symbols-only route are different code paths, so
+    # covering one does not cover the other. If no static corpus was available,
+    # build the synthetic family too -- otherwise the variable corpus alone
+    # would satisfy the run and the merge route would go untested.
+    if static_ran == 0 and any(l != "vf" for l in chosen):
         res = run("fallback", fixtures.base_family())
         total += res["failures"]
-        ran = 1
+        ran += 1
 
     print(f"\n{'-' * 72}")
     if skipped:
