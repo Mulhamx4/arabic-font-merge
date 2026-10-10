@@ -177,7 +177,8 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:#f2f2f2;paddin
 <div class="row">المبلغ &#x20C1; ٢٥٠ · &#x20C3; ١٠٠ · &#x20C4; ٥٠</div></div>
 <span id="probe"></span>
 <script>
-var SYM = "\\u20C4", probe = document.getElementById("probe");
+var SAR = "\\u20C1", AED = "\\u20C3", OMR = "\\u20C4";
+var probe = document.getElementById("probe");
 function width(t, dir){ probe.dir = dir || "ltr"; probe.textContent = t;
   return probe.getBoundingClientRect().width; }
 function same(a, b, dir){ return Math.abs(width(a, dir) - width(b, dir)) < 0.6; }
@@ -185,11 +186,13 @@ document.fonts.load("40px FT").then(function(){ return document.fonts.ready; }).
   function set(id, good){ var e = document.getElementById(id);
     e.className = "tag " + (good ? "ok" : "no");
     e.textContent = good ? "\\u2713 يشتغل" : "\\u2717 ما اشتغل"; return good; }
-  var glyph = width(SYM) > 5;
-  var r1 = set("t1", same("OMR 10.500", SYM + " 10.500"));
-  var r2 = set("t2", same("omr 5", SYM + " 5"));
-  var r3 = set("t3", same("\\u0631.\\u0639 \\u0661\\u0660", SYM + " \\u0661\\u0660", "rtl"));
-  var r4 = set("t4", same("\\u0631.\\u0639. \\u0665", SYM + " \\u0665", "rtl"));
+  var glyph = [SAR, AED, OMR].every(function(symbol){ return width(symbol) > 5; });
+  var r1 = set("t1", same("SAR 10.50", SAR + " 10.50"));
+  var r2 = set("t2", same("AED 10.50", AED + " 10.50"));
+  var r3 = set("t3", same("OMR 10.50", OMR + " 10.50"));
+  var r4 = set("t4", same("\\u0631.\\u0633 \\u0661\\u0660", SAR + " \\u0661\\u0660", "rtl")
+              && same("\\u062f.\\u0625 \\u0661\\u0660", AED + " \\u0661\\u0660", "rtl")
+              && same("\\u0631.\\u0639 \\u0661\\u0660", OMR + " \\u0661\\u0660", "rtl"));
   var r5 = set("t5", !same("comrade", OMR + "ade") && !same("SARAH", SAR + "AH")
               && !same("Caesar", "Cae" + SAR));
   var v = document.getElementById("verdict");
